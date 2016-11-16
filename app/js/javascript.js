@@ -1,4 +1,4 @@
-$( document ).ready(function(){
+document.addEventListener('DOMContentLoaded', function() {
   const w = 1220;
   const h = 660;
   const margin = {
@@ -71,7 +71,6 @@ $( document ).ready(function(){
     });
 
     d3.json(url, function(meteorData){
-      console.log(meteorData,'this is meto')
       g.selectAll("circle")
         .data(meteorData.features)
         .enter()
@@ -86,7 +85,10 @@ $( document ).ready(function(){
           let radius = scaleMass(d.properties.mass);
           return radius  * (projection.scale()/250)
         })
-        .style("fill", "green")
+        .style("fill", "rgb(15, 77, 39)")
+        .style("opacity", "0.4")
+        .style("stroke", "green")
+        .style("stroke-width", "3")
         redraw();
     });
 
