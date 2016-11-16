@@ -10,6 +10,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const url = 'https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/meteorite-strike-data.json';
 
   function render(meteorData){
+    let toolTip = d3.select("#canvas")
+                    .append("div")
+                    .classed("toolTip", true)
+                    .style("opacity", 0)
+
     const width = w - (margin.left + margin.right);
     const height = h - (margin.top + margin.bottom);
     const rotate = 0        // so that [-60, 0] becomes initial center of projection
@@ -75,6 +80,18 @@ document.addEventListener('DOMContentLoaded', function() {
         .data(meteorData.features)
         .enter()
         .append("circle")
+        .on("mouseover", function(d,i){
+          let text = toolTipText(d);
+          toolTip.transition()
+                  .style("opacity", 0.9)
+          toolTip.html(text)
+                  .style("left", (d3.event.pageX ) + "px")
+                  .style("top", (d3.event.pageY ) + "px" )
+        })
+        .on("mouseout", function(d,i){
+          toolTip.transition()
+                  .style("opacity", 0)
+        })
         .attr("cx", function(d){
           return projection([d.properties.reclong, d.properties.reclat])[0];
         })
@@ -140,6 +157,11 @@ document.addEventListener('DOMContentLoaded', function() {
           let radius = scaleMass(d.properties.mass);
           return radius  * (projection.scale()/250)
         })
+    }
+
+    function toolTipText(d){
+      let text = "hello world"
+      return text
     }
   }
   render()

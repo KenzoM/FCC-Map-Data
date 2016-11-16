@@ -3,3 +3,18 @@
   border: 1px solid black;
   background: #A4BAC7;
   margin: 20px auto; }
+
+.toolTip {
+  color: white;
+  position: absolute;
+  text-align: center;
+  max-width: 250px;
+  max-height: 98px;
+  padding: 7px;
+  font: 15px;
+  background: black;
+  border: 25px;
+  border-radius: 12px;
+  line-height: 18px;
+  pointer-events: none;
+  box-shadow: 0px 0px 12px -10px; }
