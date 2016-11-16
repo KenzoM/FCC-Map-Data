@@ -1,17 +1,17 @@
 $( document ).ready(function(){
-  const w = window.innerWidth;
-  const h = window.innerHeight;
+  const w = 1500;
+  const h = 1000;
   const margin = {
-    top: 50,
+    top: 0,
     bottom: 10,
-    left: 50,
-    right: 30
+    left: 10,
+    right: 10
   }
 
   function render(data){
     const width = w - (margin.left + margin.right);
     const height = h - (margin.top + margin.bottom);
-    const rotate = 60        // so that [-60, 0] becomes initial center of projection
+    const rotate = -10        // so that [-60, 0] becomes initial center of projection
     const maxlat = 83;        // clip northern and southern poles (infinite in mercator)
 
     var projection = d3.geo.mercator()
@@ -58,7 +58,8 @@ $( document ).ready(function(){
          .enter()
          .append("path")
          .attr("d", path)
-         .style("fill", "steelblue")
+         .style("fill", "D7C7AD")
+         .style("stroke", "9B8C74")
 
         redraw();       // update path data
     });
