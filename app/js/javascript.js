@@ -1,22 +1,22 @@
 $( document ).ready(function(){
-  const w = 1500;
-  const h = 1000;
+  const w = 1220;
+  const h = 660;
   const margin = {
     top: 0,
-    bottom: 10,
-    left: 10,
-    right: 10
+    bottom: 0,
+    left: 0,
+    right: 0
   }
 
   function render(data){
     const width = w - (margin.left + margin.right);
     const height = h - (margin.top + margin.bottom);
-    const rotate = -10        // so that [-60, 0] becomes initial center of projection
+    const rotate = 0        // so that [-60, 0] becomes initial center of projection
     const maxlat = 83;        // clip northern and southern poles (infinite in mercator)
 
     var projection = d3.geo.mercator()
         .rotate([rotate,0])
-        .scale(1)           // we'll scale up to match viewport shortly.
+        .scale(0.90)           // we'll scale up to match viewport shortly.
         .translate([width/2, height/2]);
 
     // find the top left and bottom right of current projection
