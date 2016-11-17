@@ -1,3 +1,4 @@
+//Inspired by various blogs from http://bl.ocks.org/
 document.addEventListener('DOMContentLoaded', function() {
   const w = window.innerWidth;
   const h = window.innerHeight;
@@ -17,19 +18,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const width = w - (margin.left + margin.right);
     const height = h - (margin.top + margin.bottom);
-    const rotate = 0        // so that [-60, 0] becomes initial center of projection
-    const maxlat = 83;        // clip northern and southern poles (infinite in mercator)
+    const rotate = 0;
+    const maxlat = 83;
 
     var projection = d3.geo.mercator()
         .rotate([rotate,0])
-        .scale(0.90)           // we'll scale up to match viewport shortly.
-        .translate([width/2, height/2]);
+        .scale(0.90)
+        .translate([width/2, height/2 + 100]);
 
     var scaleMass = d3.scale.sqrt()
-                            .domain([0, 23000000])
-                            .range([0, 30])
+                            .domain([0, 24000000])
+                            .range([0, 50])
 
-    // find the top left and bottom right of current projection
     function mercatorBounds(projection, maxlat) {
         var yaw = projection.rotate()[0],
             xymax = projection([-yaw+180-1e-6,-maxlat]),
@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return [xymin,xymax];
     }
 
-    // set up the scale extent and initial scale for the projection
     var b = mercatorBounds(projection, maxlat),
         s = width/(b[1][0]-b[0][0]),
         scaleExtent = [s, 10*s];
@@ -46,10 +45,14 @@ document.addEventListener('DOMContentLoaded', function() {
     projection
         .scale(scaleExtent[0]);
 
+    var linearColorScale = d3.scale.linear()
+                                    .domain([0, 1000])
+                                    .range(["green", "red"])
+
     var zoom = d3.behavior.zoom()
         .scaleExtent(scaleExtent)
         .scale(projection.scale())
-        .translate([0,0])               // not linked directly to projection
+        .translate([0,0])
         .on("zoom", redraw)
 
     var path = d3.geo.path()
@@ -60,7 +63,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('width',width)
             .attr('height',height)
             .call(zoom)
-            // .on("click", redraw)
 
     var g = svg.append("g");
 
@@ -72,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
          .attr("d", path)
          .style("fill", "D7C7AD")
          .style("stroke", "9B8C74")
-        redraw();       // update path data
+        redraw();
     });
 
     d3.json(url, function(meteorData){
@@ -102,16 +104,16 @@ document.addEventListener('DOMContentLoaded', function() {
           let radius = scaleMass(d.properties.mass);
           return radius  * (projection.scale()/250)
         })
-        .style("fill", "rgb(15, 77, 39)")
-        .style("opacity", "0.4")
-        .style("stroke", "green")
-        .style("stroke-width", "3")
+        .style("fill", function(d,i){
+          return linearColorScale(i)
+        })
+        .style("stroke", "black")
+        .style("stroke-width", "2")
         redraw();
     });
 
 
 
-    // track last translation and scale event we processed
     var tlast = [0,0],
         slast = null;
 
@@ -120,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var scale = d3.event.scale,
           t = d3.event.translate;
 
-        // if scaling changes, ignore translation (otherwise touch zooms are weird)
         if (scale != slast) {
           projection.scale(scale);
         } else {
@@ -128,22 +129,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 dy = t[1]-tlast[1],
                 yaw = projection.rotate()[0],
                 tp = projection.translate();
-
-            // use x translation to rotate based on current scale
             projection.rotate([yaw+360.*dx/width*scaleExtent[0]/scale, 0, 0]);
-            // use y translation to translate projection, clamped by min/max
             var b = mercatorBounds(projection, maxlat);
             if (b[0][1] + dy > 0) dy = -b[0][1];
             else if (b[1][1] + dy < height) dy = height-b[1][1];
             projection.translate([tp[0],tp[1]+dy]);
         }
-        // save last values.  resetting zoom.translate() and scale() would
-        // seem equivalent but doesn't seem to work reliably?
         slast = scale;
         tlast = t;
       }
 
-      g.selectAll('path')       // re-project path data
+      g.selectAll('path')
         .attr('d', path);
 
       g.selectAll("circle")

@@ -1,5 +1,5 @@
 body{
-  background: #A4BAC7;
+  background: #3591c7;
 }
 #canvas{
   width: 100%;
@@ -11,10 +11,9 @@ body{
   line-height: 1.2em;
   text-align: left;
   position: absolute;
-  max-width: 250px;
-  max-height: 98px;
+  min-width: 250px;
+  min-height: 98px;
   padding: 7px;
-  font: 15px;
   background: black;
   border: 25px;
   border-radius: 12px;
