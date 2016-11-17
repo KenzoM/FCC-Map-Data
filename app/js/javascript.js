@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-  const w = 1220;
-  const h = 660;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
   const margin = {
     top: 0,
     bottom: 0,
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .enter()
         .append("circle")
         .on("mouseover", function(d,i){
-          let text = toolTipText(d);
+          let text = toolTipText(d.properties);
           toolTip.transition()
                   .style("opacity", 0.9)
           toolTip.html(text)
@@ -160,7 +160,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function toolTipText(d){
-      let text = "hello world"
+      let text = `<strong> Name: ${d.name} </strong> <br>`
+      text += `Mass: ${d.mass} G <br>`
+      text += `Class: ${d.recclass} <br>`
+      text += `Fall: ${d.fall} <br>`
+      text += `Year: ${d.year} <br>`
       return text
     }
   }
