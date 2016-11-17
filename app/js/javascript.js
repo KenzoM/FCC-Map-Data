@@ -21,12 +21,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const rotate = 0;
     const maxlat = 83;
 
-    var projection = d3.geo.mercator()
+    const projection = d3.geo.mercator()
         .rotate([rotate,0])
         .scale(0.90)
         .translate([width/2, height/2 + 100]);
 
-    var scaleMass = d3.scale.sqrt()
+    const scaleMass = d3.scale.sqrt()
                             .domain([0, 24000000])
                             .range([0, 50])
 
@@ -38,33 +38,33 @@ document.addEventListener('DOMContentLoaded', function() {
         return [xymin,xymax];
     }
 
-    var b = mercatorBounds(projection, maxlat),
+    const b = mercatorBounds(projection, maxlat),
         s = width/(b[1][0]-b[0][0]),
         scaleExtent = [s, 10*s];
 
     projection
         .scale(scaleExtent[0]);
 
-    var linearColorScale = d3.scale.linear()
+    const linearColorScale = d3.scale.linear()
                                     .domain([0, 1000])
                                     .range(["green", "red"])
 
-    var zoom = d3.behavior.zoom()
+    const zoom = d3.behavior.zoom()
         .scaleExtent(scaleExtent)
         .scale(projection.scale())
         .translate([0,0])
         .on("zoom", redraw)
 
-    var path = d3.geo.path()
+    const path = d3.geo.path()
         .projection(projection);
 
-    var svg = d3.select("#canvas")
+    const svg = d3.select("#canvas")
         .append('svg')
             .attr('width',width)
             .attr('height',height)
             .call(zoom)
 
-    var g = svg.append("g");
+    const g = svg.append("g");
 
     d3.json("https://raw.githubusercontent.com/cjsheets/d3-projects/master/world-110m2.json", function(topology){
        g.selectAll("path")
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .data(meteorData.features)
         .enter()
         .append("circle")
-        .on("mouseover", function(d,i){
+        .on("mouseover", (d,i) =>{
           let text = toolTipText(d.properties);
           toolTip.transition()
                   .style("opacity", 0.9)
@@ -90,23 +90,17 @@ document.addEventListener('DOMContentLoaded', function() {
                   .style("left", (d3.event.pageX ) + "px")
                   .style("top", (d3.event.pageY ) + "px" )
         })
-        .on("mouseout", function(d,i){
+        .on("mouseout", (d,i) => {
           toolTip.transition()
                   .style("opacity", 0)
         })
-        .attr("cx", function(d){
-          return projection([d.properties.reclong, d.properties.reclat])[0];
-        })
-        .attr("cy", function(d){
-          return projection([d.properties.reclong, d.properties.reclat])[1];
-        })
-        .attr("r", function(d){
+        .attr("cx", d => projection([d.properties.reclong, d.properties.reclat])[0])
+        .attr("cy", d => projection([d.properties.reclong, d.properties.reclat])[1])
+        .attr("r", (d) => {
           let radius = scaleMass(d.properties.mass);
           return radius  * (projection.scale()/250)
         })
-        .style("fill", function(d,i){
-          return linearColorScale(i)
-        })
+        .style("fill", (d,i) =>(linearColorScale(i)) )
         .style("stroke", "black")
         .style("stroke-width", "2")
         redraw();
@@ -119,18 +113,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function redraw() {
       if (d3.event) {
-        var scale = d3.event.scale,
+        let scale = d3.event.scale,
           t = d3.event.translate;
 
         if (scale != slast) {
           projection.scale(scale);
         } else {
-            var dx = t[0]-tlast[0],
+            let dx = t[0]-tlast[0],
                 dy = t[1]-tlast[1],
                 yaw = projection.rotate()[0],
                 tp = projection.translate();
             projection.rotate([yaw+360.*dx/width*scaleExtent[0]/scale, 0, 0]);
-            var b = mercatorBounds(projection, maxlat);
+            let b = mercatorBounds(projection, maxlat);
             if (b[0][1] + dy > 0) dy = -b[0][1];
             else if (b[1][1] + dy < height) dy = height-b[1][1];
             projection.translate([tp[0],tp[1]+dy]);
@@ -143,13 +137,9 @@ document.addEventListener('DOMContentLoaded', function() {
         .attr('d', path);
 
       g.selectAll("circle")
-        .attr("cx", function(d) {
-          return projection([d.properties.reclong, d.properties.reclat])[0];
-        })
-        .attr("cy", function(d) {
-          return projection([d.properties.reclong, d.properties.reclat])[1];
-        })
-        .attr("r", function(d){
+        .attr("cx", d => projection([d.properties.reclong, d.properties.reclat])[0])
+        .attr("cy", d => projection([d.properties.reclong, d.properties.reclat])[1])
+        .attr("r", (d) => {
           let radius = scaleMass(d.properties.mass);
           return radius  * (projection.scale()/250)
         })
@@ -164,5 +154,5 @@ document.addEventListener('DOMContentLoaded', function() {
       return text
     }
   }
-  render()
+  render() //Start rendering!
 });
