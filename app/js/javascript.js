@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   const url = 'https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/meteorite-strike-data.json';
 
+  // render() is invoked in the last line of code
   function render(meteorData){
     let toolTip = d3.select("#canvas")
                     .append("div")
@@ -66,49 +67,54 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const g = svg.append("g");
 
-    d3.json("https://raw.githubusercontent.com/cjsheets/d3-projects/master/world-110m2.json", function(topology){
-       g.selectAll("path")
-         .data(topojson.feature(topology, topology.objects.countries).features)
-         .enter()
-         .append("path")
-         .attr("d", path)
-         .style("fill", "D7C7AD")
-         .style("stroke", "9B8C74")
-        redraw();
-    });
+    // This is topology of the world. Let's render this first, then our meteorData
+    // Using Promise will help us achieve that:
 
-    d3.json(url, function(meteorData){
-      g.selectAll("circle")
-        .data(meteorData.features)
-        .enter()
-        .append("circle")
-        .on("mouseover", (d,i) =>{
-          let text = toolTipText(d.properties);
-          toolTip.transition()
-                  .style("opacity", 0.9)
-          toolTip.html(text)
-                  .style("left", (d3.event.pageX ) + "px")
-                  .style("top", (d3.event.pageY ) + "px" )
-        })
-        .on("mouseout", (d,i) => {
-          toolTip.transition()
-                  .style("opacity", 0)
-        })
-        .attr("cx", d => projection([d.properties.reclong, d.properties.reclat])[0])
-        .attr("cy", d => projection([d.properties.reclong, d.properties.reclat])[1])
-        .attr("r", (d) => {
-          let radius = scaleMass(d.properties.mass);
-          return radius  * (projection.scale()/250)
-        })
-        .style("fill", (d,i) =>(linearColorScale(i)) )
-        .style("stroke", "black")
-        .style("stroke-width", "2")
-        redraw();
-    });
+    let myPromise = new Promise((resolve, reject)=>{
+      d3.json("https://raw.githubusercontent.com/cjsheets/d3-projects/master/world-110m2.json", function(topology){
+         g.selectAll("path")
+           .data(topojson.feature(topology, topology.objects.countries).features)
+           .enter()
+           .append("path")
+           .attr("d", path)
+           .style("fill", "D7C7AD")
+           .style("stroke", "9B8C74")
+          redraw();
+          resolve();
+      });
+    })
+    myPromise.then( ()=>{
+      d3.json(url, function(meteorData){
+        g.selectAll("circle")
+          .data(meteorData.features)
+          .enter()
+          .append("circle")
+          .on("mouseover", (d,i) =>{
+            let text = toolTipText(d.properties);
+            toolTip.transition()
+                    .style("opacity", 0.9)
+            toolTip.html(text)
+                    .style("left", (d3.event.pageX ) + "px")
+                    .style("top", (d3.event.pageY ) + "px" )
+          })
+          .on("mouseout", (d,i) => {
+            toolTip.transition()
+                    .style("opacity", 0)
+          })
+          .attr("cx", d => projection([d.properties.reclong, d.properties.reclat])[0])
+          .attr("cy", d => projection([d.properties.reclong, d.properties.reclat])[1])
+          .attr("r", (d) => {
+            let radius = scaleMass(d.properties.mass);
+            return radius  * (projection.scale()/250)
+          })
+          .style("fill", (d,i) =>(linearColorScale(i)) )
+          .style("stroke", "black")
+          .style("stroke-width", "2")
+          redraw();
+      });
+    })
 
-
-
-    var tlast = [0,0],
+    let tlast = [0,0],
         slast = null;
 
     function redraw() {
